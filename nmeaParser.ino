@@ -59,7 +59,7 @@ void loop()
         Serial.readBytesUntil('\0', nmeaStr, SENTENCE_LEN);
         parseNmea(nmeaStr, formattedStr);
         // Send parsed data to output
-        if (formattedStr != NULL)
+        if (*formattedStr != NULL)
         {
             Serial.println(formattedStr);
         }
@@ -96,6 +96,12 @@ void parseNmea(char* nmea, char* newStr)
     // Convert battery voltage
     char *end;
     long batteryV = strtol(&words[battery][0], &end, 16);
+    // Only parse if the word chanca is in the expected slot
+    if (strcmp((const char*)&words[2],"chanca") != 0)
+    {
+        *newStr = NULL;
+        return;
+    }
     sprintf(tempstr, "$RATLL,%d,%s,%s,%s,%s,B%d,Q*", atoi(&words[buoy][0]), &words[latitude][0], &words[NS][0], &words[longitude][0], &words[EW][0], batteryV);
     // Calculate checksum
     unsigned char checksum = 0;
